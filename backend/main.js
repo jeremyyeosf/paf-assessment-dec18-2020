@@ -54,7 +54,7 @@ const app = express()
 
 
 const makeQuery = (sql, pool) =>  {
-    console.log(sql);
+    // console.log(sql);
     return (async (args) => {
         const conn = await pool.getConnection();
         try {
@@ -76,6 +76,8 @@ const checkCredentials = `SELECT * FROM user
 where user_id=? && password=?`
 
 const authenticateUser = makeQuery(checkCredentials, pool);
+
+// app.use(express.static(__dirname + '/frontend'))
 
 app.use(cors());
 app.use(morgan('combined'))
@@ -109,15 +111,22 @@ app.post('/authentication', async (req, res) => {
 // share and upload (this works on ARC upload to s3)
 const upload = multer({
     storage: multerS3({
-        s3: s3,
-        bucket: AWS_S3_BUCKET_NAME,
-        acl: 'public-read',
-        key: (req, file, callback) => {
-            console.log('file:', file) 
-            callback(null, new Date().getTime() + '_' + file.originalname)
-        }
+      s3: s3,
+      bucket: AWS_S3_BUCKET_NAME,
+      acl: 'public-read',
+      metadata: function (req, file, cb) {
+        cb(null, {
+            fieldName: file.fieldname,
+            originalFileName: file.originalname,
+            uploadTimeStamp: new Date().toString(),
+        });
+      },
+      key: function (request, file, cb) {
+        console.log(file);
+        cb(null, new Date().getTime()+'_'+ file.originalname);
+      }
     })
-}).single('upload')
+  }).single('upload');
 
 app.post('/share', (req, res) => {
     try {

@@ -10,8 +10,8 @@ export class ShareService {
 
   constructor(private http: HttpClient) { }
 
-  share(formBody): Observable<any> {
-    return this.http.post<any>('http://localhost:3000/share', formBody).pipe(
+  share(data): Observable<any> {
+    return this.http.post<any>('share', data).pipe(
       tap((result: any) => console.log(`sharing... (Ng call Express)`)),
       catchError(this.handleError<any>())
     )

@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {CameraService} from '../camera.service';
@@ -16,19 +17,14 @@ export class MainComponent implements OnInit {
 	isThereImage: boolean = false
 	mainform: FormGroup
 
-	constructor(private cameraSvc: CameraService, private fb: FormBuilder, private shareService: ShareService, private loginService: LoginService) { }
+	constructor(private cameraSvc: CameraService, private fb: FormBuilder, private shareService: ShareService, private loginService: LoginService, private http: HttpClient) { }
 
 	ngOnInit(): void {
-		// console.log('isImagePathCactus?', this.isImagePathCactus)
-		console.log('hasImage?', this.cameraSvc.hasImage())
 		if (this.cameraSvc.hasImage()) {
 			const img = this.cameraSvc.getImage()
 			console.log('img captured :>>>', img)
 			this.imagePath = img.imageAsDataUrl
-			// this.isImagePathCactus = false
 			this.isThereImage = this.cameraSvc.hasImage()
-
-			
 		}
 
 		this.mainform = this.fb.group({
@@ -43,14 +39,22 @@ export class MainComponent implements OnInit {
 		this.imagePath = '/assets/cactus.png'
 		this.cameraSvc.clear()
 		this.mainform.reset()
-		// this.isImagePathCactus = true
-		console.log('hasImage?', this.cameraSvc.hasImage())
 		this.isThereImage = this.cameraSvc.hasImage()
 	}
 
 	share() {
-		console.log('sharing these details...>', this.mainform.value)
-		this.shareService.share(this.mainform.value)
-			.subscribe()
+		const formData = new FormData();
+    	formData.set('title', this.mainform.get('title').value);
+		formData.set('comments', this.mainform.get('comments').value);
+		formData.set('username', this.mainform.get('username').value);
+		formData.set('password', this.mainform.get('password').value);
+		formData.set('upload', this.cameraSvc.getImage().imageData);
+
+		this.http.post('/share', formData).toPromise()
+			.then()
+
+		// this.shareService.share(formData)
+		// 	.subscribe()
+		this.clear()
 	}
 }
