@@ -1,4 +1,6 @@
 require('dotenv').config();
+const sha1 = require('sha1');
+
 
 const morgan = require('morgan')
 const express = require("express"),
@@ -76,7 +78,7 @@ app.post('/authentication', async (req, res) => {
     try {
         let result
         // console.log('authenticating...', req.body)
-        await authenticateUser([req.body.username, req.body.password])
+        await authenticateUser([req.body.username, sha1(req.body.password)])
             .then(result => {
                 this.result = result
             })
