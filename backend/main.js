@@ -77,7 +77,7 @@ where user_id=? && password=?`
 
 const authenticateUser = makeQuery(checkCredentials, pool);
 
-// app.use(express.static(__dirname + '/frontend'))
+app.use(express.static(__dirname + '/frontend'))
 
 app.use(cors());
 app.use(morgan('combined'))
