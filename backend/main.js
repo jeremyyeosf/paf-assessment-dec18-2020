@@ -41,12 +41,59 @@ const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000
 
 const app = express()
 
+
+
+const makeQuery = (sql, pool) =>  {
+    console.log(sql);
+    return (async (args) => {
+        const conn = await pool.getConnection();
+        try {
+            let results = await conn.query(sql, args || []);
+            console.log('return from SQL:', results[0]);
+            if (results[0].length == 0) {
+                throw new Error
+            } else {return results[0]}
+            
+        }catch(err){
+            console.log('no results from SQL', err);
+        } finally {
+            conn.release();
+        }
+    });
+};
+
+const checkCredentials = `SELECT * FROM user
+where user_id=? && password=?`
+
+const authenticateUser = makeQuery(checkCredentials, pool);
+
 app.use(cors());
 app.use(morgan('combined'))
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(bodyParser.json({limit: '50mb'}));
 
-
+app.post('/authentication', async (req, res) => {
+    try {
+        let result
+        // console.log('authenticating...', req.body)
+        await authenticateUser([req.body.username, req.body.password])
+            .then(result => {
+                this.result = result
+            })
+        if (this.result === undefined) {
+            throw new Error
+        } else {
+            res.status(200)
+            res.type('application/json')
+            res.send({message: 'user validated'})
+        }
+    } catch (e) {
+        console.log('ERROR: ', e)
+        res.status(401)
+        res.type('application/json')
+        res.send({message: 'wrong username or password'})
+    }
+})
 
 app.listen(PORT, () => {
 	console.info(`Application started on port ${PORT} at ${new Date()}`)
