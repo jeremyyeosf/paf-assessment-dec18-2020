@@ -2,20 +2,17 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { LoginCredentials } from './models';
 
 @Injectable({
   providedIn: 'root'
 })
-export class LoginService {
-
-  loginCredentials: LoginCredentials
+export class ShareService {
 
   constructor(private http: HttpClient) { }
 
-  submitLoginDetails(formBody): Observable<any> {
-    return this.http.post<any>('http://localhost:3000/authentication', formBody).pipe(
-      tap((result: any) => console.log(`submitted login details for authentication`)),
+  share(formBody): Observable<any> {
+    return this.http.post<any>('http://localhost:3000/share', formBody).pipe(
+      tap((result: any) => console.log(`sharing... (Ng call Express)`)),
       catchError(this.handleError<any>())
     )
   }

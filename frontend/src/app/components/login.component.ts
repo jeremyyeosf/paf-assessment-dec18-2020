@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
 
   login() {
     console.log('form processed: ', this.loginform.value)
+
     this.loginService.submitLoginDetails(this.loginform.value).subscribe(
       result=>{
         console.log('response from express: ', result)
@@ -36,6 +37,8 @@ export class LoginComponent implements OnInit {
         }
       }
     )
+    this.loginService.loginCredentials = this.loginform.value
+    console.log('credentials inside service: ', this.loginService.loginCredentials)
 
   }
 }
